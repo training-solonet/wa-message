@@ -32,18 +32,25 @@ router.get("/get-groups-members", async (req, res) => {
   }
 });
 
-router.post("/message", async (req, res) => {
+router.get('/check-message', async (req, res) => {
+  const chatId = req.query.chatId;
+  const messages = await whatsappClient.getChatById(chatId);
+  const total_messages = await messages.fetchMessages({ limit: 10 });
+  res.send({ total_messages: total_messages });
+});
 
-  const message = "Semangat siang! 🔥 Mari sebagai relawan penggerak udara, mari kita bantu sebarkan konten-konten berikut. Andika- Hendi Menang Mutlak!";
+router.get("/message", async (req, res) => {
+
+  const message = "Happy Wedding Anniversary Bapak Andika dan Ibu Hetty 😇";
 
   // Memuat file video langsung dari path
-  const videoMedia = MessageMedia.fromFilePath('./src/assets/video/2.mp4'); // Sesuaikan dengan path file Anda
+  const videoMedia = MessageMedia.fromFilePath('./src/assets/video/7.mp4'); // Sesuaikan dengan path file Anda
 
   // get all informan
   const informan = await Informan.findAll({
     attributes: ["nama", "no_hp"],
-    limit: 150,
-    offset: 200,
+    limit: 500,
+    offset: 5,
   });
 
   // change no_hp to 62
@@ -55,7 +62,13 @@ router.post("/message", async (req, res) => {
   });
 
   // except number
-  const exceptNumber = ["6282135922585"];
+  const exceptNumber = [
+    "6282135922585",
+    "6281328835144",
+    "6282135387888",
+    "6282322050123",
+    "6281314943174"
+  ];
 
   // filter phone_numbers
   const filteredPhoneNumbers = phone_numbers.filter((data) => {
@@ -86,13 +99,17 @@ router.post("/message", async (req, res) => {
   res.send({ status: "Message sent successfully" });
 });
 
-router.post("/broadcast", async (req, res) => {
-  const { message, mediaUrl, mediaType } = req.body;
+router.get("/broadcast", async (req, res) => {
+
+  const message = "https://www.tiktok.com/@pasukanandikaperkasa?_t=8pQounykiXZ&_r=1 \nHari pemilihan sudah dekat. Ayo jangan lupa terus sebarkan konten-konten ini di media sosial yang Anda punya. Mari dukung bersama, ANDIKA-HENDI MENANG MUTLAK! 🔥";
+  // const mediaUrl = 'http://127.0.0.1:3000/src/assets/photo/12.jpg'; // Sesuaikan dengan path file Anda
+  const mediaUrl = null;
+  const mediaType = "image"; // Ganti dengan "video" jika ingin mengirim video
 
   // get all informan
   const informan = await Informan.findAll({
     attributes: ["nama", "no_hp"],
-    limit: 5,
+    limit: 3,
     offset: 0,
   });
 
@@ -105,7 +122,13 @@ router.post("/broadcast", async (req, res) => {
   });
 
   // except number
-  const exceptNumber = ["6282135922585"];
+  const exceptNumber = [
+    "6282135922585",
+    "6281328835144",
+    "6282135387888",
+    "6282322050123",
+    "6281314943174"
+  ];
 
   // filter phone_numbers
   const filteredPhoneNumbers = phone_numbers.filter((data) => {
@@ -139,7 +162,7 @@ router.post("/broadcast", async (req, res) => {
         logData.push({ phone_number, status: "Message sent successfully" });
 
         // Delay between messages
-        const randomDelay = Math.floor(Math.random() * 3000) + 1000;
+        const randomDelay = Math.floor(Math.random() * 2000) + 1000;
         await delay(randomDelay);
       } catch (error) {
         console.error("Error sending message:", error);
@@ -152,16 +175,18 @@ router.post("/broadcast", async (req, res) => {
       }
     }
   } else {
+    let number = 0;
     for (const phone_number of filteredPhoneNumbers) {
+      number++;
       try {
         const phoneSuffix = `${phone_number}@c.us`;
         // send message
         await whatsappClient.sendMessage(phoneSuffix, message);
+        console.log(`Message sent to ${number} of ${phone_numbers.length}`);
         // Menyimpan log broadcast
         logData.push({ phone_number, status: "Message sent successfully" });
-
         // Delay between messages
-        const randomDelay = Math.floor(Math.random() * 3000) + 1000;
+        const randomDelay = Math.floor(Math.random() * 10000) + 1000;
         await delay(randomDelay);
       } catch (error) {
         console.error("Error sending message:", error);

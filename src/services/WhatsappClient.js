@@ -27,25 +27,9 @@ whatsappClient.on('ready', async () => {
   // Filter untuk mendapatkan chat grup saja
   const groups = chats.filter(chat => chat.isGroup);
 
-  console.log('Grup WhatsApp:');
   groups.forEach(group => {
       console.log(`Nama Grup: ${group.name} - ID Grup: ${group.id._serialized}`);
   });
-});
-
-whatsappClient.on("message", async (msg) => {
-  try {
-    if (msg.from != "status@broadcast") {
-      const contact = await msg.getContact();
-      console.log(contact, msg.body);
-    }
-  } catch (error) {
-    if (error.name === "ProtocolError") {
-      console.log("ProtocolError: Konteks eksekusi dihancurkan");
-    } else {
-      console.log(error);
-    }
-  }
 });
 
 whatsappClient.on("disconnected", (reason) => {
